@@ -24,9 +24,9 @@ function getNLUInstance() {
         const naturalLanguageUnderstanding = new NaturalLanguageUnderstandingV1({
         version: '2021-08-01',
         authenticator: new IamAuthenticator ({
-            apikey: api_key,
+            apikey: "sRTdOHiQ22Xo63LyHcBz4m7_jQi_bQ-Wn1r9zkVCcVys",
         }),
-        serviceUrl: api_url,
+        serviceUrl: "https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/c7318009-bf41-48fb-887f-86ef49996b59",
     });
     return naturalLanguageUnderstanding
 }
@@ -119,8 +119,30 @@ naturalLanguageUnderstanding.analyze(analyzeParams)
 });
 
 app.get("/text/sentiment", (req,res) => {
-    return res.send("text sentiment for "+req.query.text);
+    let textToAnalyze = req.query.text
+    const analyzeParams = 
+    {
+        "text": textToAnalyze,
+        "features": {
+            "keywords": {
+                "sentiment": true,
+                "limit": 1
+            }
+        }
+    }
+    const naturalLanguageUnderstanding = getNLUInstance();
+
+naturalLanguageUnderstanding.analyze(analyzeParams)
+.then(analysisResults => {
+    //Retrieve the sentiment and return it as a formatted string
+
+    return res.send(analysisResults.result.keywords[0].sentiment,null,2);
+})
+.catch(err => {
+    return res.send("Could not do desired operation "+err);
 });
+});
+
 
 let server = app.listen(8080, () => {
     console.log('Listening', server.address().port)
